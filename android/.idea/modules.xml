@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../MapaFacultades.iml" filepath="$PROJECT_DIR$/../MapaFacultades.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../MapaRpgLibgdx.iml" filepath="$PROJECT_DIR$/../MapaRpgLibgdx.iml" />
       <module fileurl="file://$PROJECT_DIR$/android.iml" filepath="$PROJECT_DIR$/android.iml" />
       <module fileurl="file://$PROJECT_DIR$/../core/core.iml" filepath="$PROJECT_DIR$/../core/core.iml" />
     </modules>

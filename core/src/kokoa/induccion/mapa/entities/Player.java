@@ -89,7 +89,7 @@ public class Player extends Sprite implements InputProcessor {
             animationTime = 0;
         }
         //se detiene en el punto marcado velocity.x = 0
-        if ((getX() >= (relationX - 0) && getX() <= (relationX + 0)) || pointX == 0.0f){
+        if ((getX() >= (relationX - 6) && getX() <= (relationX + 6)) || pointX == 0.0f){
             //System.out.println("player: "+getX() + ", point: " + pointX);
             velocity.x = 0;
             animationTime = 0;
@@ -128,7 +128,7 @@ public class Player extends Sprite implements InputProcessor {
             animationTime = 0;
         }
         //se detiene en el punto marcado velocity.y = 0
-        if ((getY() >= (relationY - 0) && getY() <= (relationY + 0)) || pointY == 0.0f){
+        if ((getY() >= (relationY - 6) && getY() <= (relationY + 6)) || pointY == 0.0f){
             //System.out.println("player: "+getY() + ", point: " + relationY);
             velocity.y = 0;
             animationTime = 0;
