@@ -17,8 +17,9 @@ public class Player extends Sprite implements InputProcessor {
     private Vector2 velocity = new Vector2();
 
     private float speed = 140 * 2, gravity = 0, animationTime = 0, increment;
+    private float wPer = 0.3f, hPer = 0.3f;
 
-    private boolean canJump;
+    private boolean canJump, movimiento=false;
 
     private Animation still, left, right;
     private TiledMapTileLayer collisionLayer;
@@ -26,7 +27,7 @@ public class Player extends Sprite implements InputProcessor {
     private String blockedKey = "blocked";
 
     private int wMap, hMap, wCam, hCam;
-    private float wScreen, hScreen, pointX, pointY, relationX, relationY;
+    private float wScreen, hScreen, pointX=0, pointY=0, relationX, relationY;
 
     public Player(Animation still, Animation left, Animation right, TiledMapTileLayer collisionLayer, int wMap, int hMap, int wCam, int hCam) {
         super((TextureRegion) still.getKeyFrame(0));
@@ -89,15 +90,14 @@ public class Player extends Sprite implements InputProcessor {
             animationTime = 0;
         }
         //se detiene en el punto marcado velocity.x = 0
-        if ((getX() >= (relationX - 6) && getX() <= (relationX + 6)) || pointX == 0.0f){
-            //System.out.println("player: "+getX() + ", point: " + pointX);
+        if (!movimiento){
             velocity.x = 0;
             animationTime = 0;
-        }else if(relationX > getX()){
+        }else if(pointX >= (wScreen - (wScreen * wPer))){
             //derecha
             velocity.x = speed;
             animationTime = 0;
-        }else if(relationX < getX()){
+        }else if(pointX <= (wScreen * wPer)){
             //izquierda
             velocity.x = -speed;
             animationTime = 0;
@@ -128,17 +128,17 @@ public class Player extends Sprite implements InputProcessor {
             animationTime = 0;
         }
         //se detiene en el punto marcado velocity.y = 0
-        if ((getY() >= (relationY - 6) && getY() <= (relationY + 6)) || pointY == 0.0f){
+        if (!movimiento){
             //System.out.println("player: "+getY() + ", point: " + relationY);
             velocity.y = 0;
             animationTime = 0;
-        }else if(relationY > getY()){
+        }else if(pointY >= (hScreen - (hScreen * hPer))){
             //derecha
-            velocity.y = speed;
-            animationTime = 0;
-        }else if(relationY < getY()){
-            //izquierda
             velocity.y = -speed;
+            animationTime = 0;
+        }else if(pointY <= (hScreen * hPer)){
+            //izquierda
+            velocity.y = speed;
             animationTime = 0;
         }
 
@@ -215,33 +215,12 @@ public class Player extends Sprite implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        switch(keycode) {
-            case Keys.W:
-                if(canJump) {
-                    velocity.y = speed / 1.8f;
-                    canJump = false;
-                }
-                break;
-            case Keys.A:
-                velocity.x = -speed;
-                animationTime = 0;
-                break;
-            case Keys.D:
-                velocity.x = speed;
-                animationTime = 0;
-        }
-        return true;
+        return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        switch(keycode) {
-            case Keys.A:
-            case Keys.D:
-                velocity.x = 0;
-                animationTime = 0;
-        }
-        return true;
+        return false;
     }
 
     @Override
@@ -278,14 +257,15 @@ public class Player extends Sprite implements InputProcessor {
         this.pointY = screenY;
         this.relationX = relationMapX(screenX);
         this.relationY = relationMapY(screenY);
-
-        return true;
+        movimiento = true;
+        return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        //velocity.x = 0;
+        velocity.x = 0;
         velocity.y = 0;
+        movimiento = false;
         animationTime = 0;
         return true;
     }

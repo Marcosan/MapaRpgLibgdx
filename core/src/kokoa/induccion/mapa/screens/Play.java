@@ -56,7 +56,7 @@ public class Play implements Screen {
 
     @Override
     public void show() {
-        map = new TmxMapLoader().load("maps/mapaprueba.tmx");
+        map = new TmxMapLoader().load("maps/FiecFEPOL.tmx");
         wMap = Integer.parseInt(map.getProperties().get("width").toString()) * Integer.parseInt(map.getProperties().get("tilewidth").toString());
         hMap = Integer.parseInt(map.getProperties().get("height").toString()) * Integer.parseInt(map.getProperties().get("tileheight").toString());
 
@@ -66,7 +66,7 @@ public class Play implements Screen {
         Gdx.gl.glLineWidth(3);
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false,wMap, hMap);
+        camera.setToOrtho(false,CAM_SIZE_X, CAM_SIZE_Y);
 
         playerAtlas = new TextureAtlas("img/player/player.pack");
         Animation still, left, right;
@@ -77,7 +77,7 @@ public class Play implements Screen {
         left.setPlayMode(Animation.PlayMode.LOOP);
         right.setPlayMode(Animation.PlayMode.LOOP);
 
-        player = new Player(still, left, right, (TiledMapTileLayer) map.getLayers().get("Paredes_cercas"), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y);
+        player = new Player(still, left, right, (TiledMapTileLayer) map.getLayers().get("paredes"), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y);
         //player.setPosition(11 * player.getCollisionLayer().getTileWidth(), (player.getCollisionLayer().getHeight() - 14) * player.getCollisionLayer().getTileHeight());
         player.setPosition(150,300);
 
@@ -89,19 +89,20 @@ public class Play implements Screen {
         Array<StaticTiledMapTile> frameTiles = new Array<StaticTiledMapTile>(2);
 
         // get the frame tiles
+        /*
         Iterator<TiledMapTile> tiles = map.getTileSets().getTileSet("tileset").iterator();
         while(tiles.hasNext()) {
             TiledMapTile tile = tiles.next();
             if(tile.getProperties().containsKey("animation") && tile.getProperties().get("animation", String.class).equals("flower"))
                 frameTiles.add((StaticTiledMapTile) tile);
         }
-
+        */
         // create the animated tile
         AnimatedTiledMapTile animatedTile = new AnimatedTiledMapTile(1 / 3f, frameTiles);
 
         // background layer
-        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("Paredes_cercas");
-
+        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get("paredes");
+        /*
         // replace static with animated tile
         for(int x = 0; x < layer.getWidth(); x++)
             for(int y = 0; y < layer.getHeight(); y++) {
@@ -109,7 +110,7 @@ public class Play implements Screen {
                 //if(cell.getTile().getProperties().containsKey("animation") && cell.getTile().getProperties().get("animation", String.class).equals("flower"))
                 //    cell.setTile(animatedTile);
             }
-
+        */
     }
 
     @Override
