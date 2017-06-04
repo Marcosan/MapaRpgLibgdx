@@ -2,6 +2,7 @@ package kokoa.induccion.mapa.entities;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -16,11 +17,12 @@ public class Player extends Sprite implements InputProcessor {
     /** the movement velocity */
     private Vector2 velocity = new Vector2();
 
-    private float speed = 140 * 2, gravity = 0, animationTime = 0, increment;
+    private float speed = 6 , gravity = 0, animationTime = 0, increment;
     private float wPer = 0.3f, hPer = 0.3f;
 
     private boolean canJump, movimiento=false;
 
+    private Animation<TextureRegion> walkAnimation;
     private Animation still, left, right;
     private TiledMapTileLayer collisionLayer;
 
@@ -41,7 +43,7 @@ public class Player extends Sprite implements InputProcessor {
         this.right = right;
         this.collisionLayer = collisionLayer;
         //setSize(collisionLayer.getWidth(), collisionLayer.getHeight() );
-        setSize(50,50);
+        setSize(40,40);
         wScreen = Gdx.graphics.getWidth();
         hScreen = Gdx.graphics.getHeight();
     }
@@ -67,7 +69,8 @@ public class Player extends Sprite implements InputProcessor {
         boolean collisionX = false, collisionY = false;
 
         // move on x
-        setPosition(getX() + velocity.x * delta,getY());
+        //setPosition(getX() + velocity.x * delta,getY());
+        setPosition(getX() + velocity.x,getY());
 
         // calculate the increment for step in #collidesLeft() and #collidesRight()
         increment = collisionLayer.getTileWidth();
@@ -85,7 +88,6 @@ public class Player extends Sprite implements InputProcessor {
         }
         //Para que no se salga del mapa
         if (getX() >= wMap || getX() <= 0){
-            //System.out.println("player: "+getX() + ", point: " + pointX);
             velocity.x = 0;
             animationTime = 0;
         }
@@ -95,6 +97,7 @@ public class Player extends Sprite implements InputProcessor {
             animationTime = 0;
         }else if(pointX >= (wScreen - (wScreen * wPer))){
             //derecha
+            System.out.println("JUGADOR: X: " + getX() + ", Y: " + getY());
             velocity.x = speed;
             animationTime = 0;
         }else if(pointX <= (wScreen * wPer)){
@@ -104,7 +107,8 @@ public class Player extends Sprite implements InputProcessor {
         }
 
         // move on y
-        setPosition(getX(),getY() + velocity.y * delta);
+        //setPosition(getX(),getY() + velocity.y * delta);
+        setPosition(getX(),getY() + velocity.y);
 
         // calculate the increment for step in #collidesBottom() and #collidesTop()
         increment = collisionLayer.getTileHeight();
@@ -123,7 +127,7 @@ public class Player extends Sprite implements InputProcessor {
 
         //Para que no se salga del mapa
         if (getY() >= hMap || getY() <= 0){
-            System.out.println("player: "+getY() + ", point: " + relationY);
+            //System.out.println("player: "+getY() + ", point: " + relationY);
             velocity.y = 0;
             animationTime = 0;
         }
@@ -143,8 +147,10 @@ public class Player extends Sprite implements InputProcessor {
         }
 
         // update animation
-        //animationTime += delta;
-        //setRegion(velocity.x < 0 ? left.getKeyFrame(animationTime) : velocity.x > 0 ? right.getKeyFrame(animationTime) : still.getKeyFrame(animationTime));
+        animationTime += delta;
+        setRegion(velocity.x < 0 ? (TextureRegion) left.getKeyFrame(animationTime) :
+                velocity.x > 0 ? (TextureRegion) right.getKeyFrame(animationTime) :
+                        (TextureRegion) still.getKeyFrame(animationTime));
     }
 
     private boolean isCellBlocked(float x, float y) {
@@ -228,35 +234,10 @@ public class Player extends Sprite implements InputProcessor {
         return false;
     }
 
-    public float relationMapX(float x){
-        float xTmp = (wMap * x) / wScreen;
-        return xTmp;
-    }
-
-    public float relationMapY(float y){
-        float percent = 100 * y / hScreen;
-        float newPointY;
-        //if(percent > 50){
-               newPointY = (100 - percent) * hScreen / 100;
-
-        float yTmp = (hMap * newPointY) / hScreen;
-        return yTmp;
-    }
-
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        Vector3 clickCoordinates = new Vector3(screenX,screenY,0);
-        //Vector3 position = camera.unproject(clickCoordinates);
-        //setPosition(0, 0);
-        float porciento = 0.3f;
-        float porcientoYup = hScreen - porciento * hScreen;
-        float porcientoYdw = porciento * hScreen;
-        float porcientoXr = wScreen - porciento * wScreen;
-        float porcientoXl = porciento * wScreen;
         this.pointX = screenX;
         this.pointY = screenY;
-        this.relationX = relationMapX(screenX);
-        this.relationY = relationMapY(screenY);
         movimiento = true;
         return false;
     }
