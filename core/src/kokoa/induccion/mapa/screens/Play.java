@@ -28,11 +28,17 @@ import com.badlogic.gdx.math.Ellipse;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Polyline;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 
+import kokoa.induccion.mapa.entities.Crono;
+import kokoa.induccion.mapa.entities.NPC;
+import kokoa.induccion.mapa.entities.NpcWalk;
 import kokoa.induccion.mapa.entities.Player;
 
 /**
@@ -42,6 +48,8 @@ import kokoa.induccion.mapa.entities.Player;
 public class Play implements InputProcessor, Screen {
     private static final int CAM_SIZE_X = 700;
     private static final int CAM_SIZE_Y = 600;
+    private static final int NUM_NPC = 5;
+
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
     private OrthographicCamera camera;
@@ -63,6 +71,9 @@ public class Play implements InputProcessor, Screen {
 
     private String capa = "paredes"; //  Paredes_cercas     paredes
 
+    //NPCs
+    private ArrayList<NPC> npcList;
+
 
     @Override
     public void show() {
@@ -81,17 +92,31 @@ public class Play implements InputProcessor, Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false,CAM_SIZE_X, CAM_SIZE_Y);
 
+        npcList = new ArrayList<NPC>(NUM_NPC);
+
+        Crono crono=new Crono();
+        crono.start();
 
         playerAtlas = new TextureAtlas("img/player/player.pack");
+        Hashtable<String, Animation> animation = new Hashtable<String, Animation>();
         Animation still, left, right;
         still = new Animation(1 / 2f, playerAtlas.findRegions("still"));
         left = new Animation(1 / 6f, playerAtlas.findRegions("left"));
         right = new Animation(1 / 6f, playerAtlas.findRegions("right"));
+
         still.setPlayMode(Animation.PlayMode.LOOP);
         left.setPlayMode(Animation.PlayMode.LOOP);
         right.setPlayMode(Animation.PlayMode.LOOP);
 
-        player = new Player(still, left, right, (TiledMapTileLayer) map.getLayers().get(capa), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y);
+        animation.put("still", still);
+        animation.put("left", left);
+        animation.put("right", right);
+
+        player = new Player(animation, (TiledMapTileLayer) map.getLayers().get(capa), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y);
+
+        for (int i = 0; i < npcList.size(); i++){
+            npcList.add(i, new NPC(animation, (TiledMapTileLayer) map.getLayers().get(capa), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y, new NpcWalk(5,5), crono, 3));
+        }
         //player = new Player(still, left, right, (TiledMapTileLayer) map.getLayers().get("Paredes_cercas"), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y);
         //player.setPosition(11 * player.getCollisionLayer().getTileWidth(), (player.getCollisionLayer().getHeight() - 14) * player.getCollisionLayer().getTileHeight());
         player.setPosition(posIniX,posIniY);
@@ -102,30 +127,6 @@ public class Play implements InputProcessor, Screen {
 
         // frames
         Array<StaticTiledMapTile> frameTiles = new Array<StaticTiledMapTile>(2);
-
-        // get the frame tiles
-/*
-        Iterator<TiledMapTile> tiles = map.getTileSets().getTileSet("tileset").iterator();
-        while(tiles.hasNext()) {
-            TiledMapTile tile = tiles.next();
-            if(tile.getProperties().containsKey("animation") && tile.getProperties().get("animation", String.class).equals("flower"))
-                frameTiles.add((StaticTiledMapTile) tile);
-        }
-
-        // create the animated tile
-        AnimatedTiledMapTile animatedTile = new AnimatedTiledMapTile(1 / 3f, frameTiles);
-
-        // background layer
-        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(capa);
-
-        // replace static with animated tile
-        for(int x = 0; x < layer.getWidth(); x++)
-            for(int y = 0; y < layer.getHeight(); y++) {
-                Cell cell = layer.getCell(x, y);
-                if(cell.getTile().getProperties().containsKey("animation") && cell.getTile().getProperties().get("animation", String.class).equals("flower"))
-                    cell.setTile(animatedTile);
-            }
-*/
     }
 
     @Override
@@ -146,50 +147,16 @@ public class Play implements InputProcessor, Screen {
         renderer.render(foreground);
         renderer.render(objLayer);
 
-        // render objects
-        sr.setProjectionMatrix(camera.combined);
-        if (map.getLayers().get("objects") != null)
-        for(MapObject object : map.getLayers().get("objects").getObjects())
-            if(object instanceof RectangleMapObject) {
-                RectangleMapObject rectObject = (RectangleMapObject) object;
-                Rectangle rect = rectObject.getRectangle();
-                if(rectObject.getProperties().containsKey("gid")) { // if it contains the gid key, it's an image object from Tiled
-                    int gid = rectObject.getProperties().get("gid", Integer.class);
-                    TiledMapTile tile = map.getTileSets().getTile(gid);
-                    renderer.getBatch().begin();
-                    renderer.getBatch().draw(tile.getTextureRegion(), rect.x, rect.y);
-                    renderer.getBatch().end();
-                } else { // otherwise, it's a normal RectangleMapObject
-                    sr.begin(ShapeType.Filled);
-                    sr.rect(rect.x, rect.y, rect.width, rect.height);
-                    sr.end();
-                }
-            } else if(object instanceof CircleMapObject) {
-                Circle circle = ((CircleMapObject) object).getCircle();
-                sr.begin(ShapeType.Filled);
-                sr.circle(circle.x, circle.y, circle.radius);
-                sr.end();
-            } else if(object instanceof EllipseMapObject) {
-                Ellipse ellipse = ((EllipseMapObject) object).getEllipse();
-                sr.begin(ShapeType.Filled);
-                sr.ellipse(ellipse.x, ellipse.y, ellipse.width, ellipse.height);
-                sr.end();
-            } else if(object instanceof PolylineMapObject) {
-                Polyline line = ((PolylineMapObject) object).getPolyline();
-                sr.begin(ShapeType.Line);
-                sr.polyline(line.getTransformedVertices());
-                sr.end();
-            } else if(object instanceof PolygonMapObject) {
-                Polygon poly = ((PolygonMapObject) object).getPolygon();
-                sr.begin(ShapeType.Line);
-                sr.polygon(poly.getTransformedVertices());
-                sr.end();
-            }
-
         if(Gdx.input.isTouched()){
             camera.position.set(player.getX(), player.getY(), 0);
         }
 
+    }
+
+    public int[][] getPosNpc(){
+        int pos_npc[][] = new int[NUM_NPC][2];
+        pos_npc[0] = new int[]{1, 2};
+        return pos_npc;
     }
 
     @Override

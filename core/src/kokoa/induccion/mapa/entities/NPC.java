@@ -1,8 +1,6 @@
 package kokoa.induccion.mapa.entities;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -10,11 +8,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 
 import java.util.Hashtable;
 
-public class Player extends Sprite implements InputProcessor {
+public class NPC extends Sprite implements InputProcessor {
 
     /** the movement velocity */
     private Vector2 velocity = new Vector2();
@@ -32,8 +29,15 @@ public class Player extends Sprite implements InputProcessor {
 
     private int wMap, hMap, wCam, hCam;
     private float wScreen, hScreen, pointX=0, pointY=0;
+    private int seg_wait=0;
+    private Crono crono;
+    private boolean arriba = false, abajo = false, derecha = false, izquierda = false;
+    //Matriz para el recorrido
+    private  NpcWalk npcWalk;
+    //posicion segun la matriz
+    private int global_i = 0, global_j = 0;
 
-    public Player(Hashtable<String, Animation> animation, TiledMapTileLayer collisionLayer, int wMap, int hMap, int wCam, int hCam) {
+    public NPC(Hashtable<String, Animation> animation, TiledMapTileLayer collisionLayer, int wMap, int hMap, int wCam, int hCam, NpcWalk npcWalk, Crono crono, int seg_wait) {
         super((TextureRegion) animation.get("still").getKeyFrame(0));
         //super();
         this.wMap = wMap;
@@ -42,6 +46,9 @@ public class Player extends Sprite implements InputProcessor {
         this.hCam = hCam;
         this.animation = animation;
         this.collisionLayer = collisionLayer;
+        this.seg_wait = seg_wait;
+        this.crono = crono;
+        this.npcWalk = npcWalk;
         //setSize(collisionLayer.getWidth(), collisionLayer.getHeight() );
         setSize(40,40);
         wScreen = Gdx.graphics.getWidth();
@@ -64,6 +71,8 @@ public class Player extends Sprite implements InputProcessor {
         else if(velocity.y < -speed)
             velocity.y = -speed;
 
+        settingMove();
+
         collisionCharacterX();
 
         moveCharacterX();
@@ -79,6 +88,18 @@ public class Player extends Sprite implements InputProcessor {
                         (TextureRegion) animation.get("still").getKeyFrame(animationTime));
     }
 
+    private void settingMove() {
+        if (crono.getNuSeg() % seg_wait != 0){
+            movimiento = true;
+        } else{
+            int signo = (int) (Math.random() * 2) + 1;
+            signo = (int) Math.pow((-1), signo);
+            if(global_i > 0){
+                //if
+            }
+        }
+    }
+
     private void moveCharacterY() {
         //Para que no se salga del mapa
         if (getY() >= hMap || getY() <= 0){
@@ -91,12 +112,12 @@ public class Player extends Sprite implements InputProcessor {
             //System.out.println("player: "+getY() + ", point: " + relationY);
             velocity.y = 0;
             animationTime = 0;
-        }else if(pointY >= (hScreen - (hScreen * hPer))){
-            //derecha
+        }else if(arriba){
+            //arriba
             velocity.y = -speed;
             animationTime = 0;
-        }else if(pointY <= (hScreen * hPer)){
-            //izquierda
+        }else if(abajo){
+            //abajo
             velocity.y = speed;
             animationTime = 0;
         }
@@ -116,17 +137,15 @@ public class Player extends Sprite implements InputProcessor {
         if (!movimiento){
             velocity.x = 0;
             animationTime = 0;
-        }else if(pointX >= (wScreen - (wScreen * wPer))){
+        }else if(derecha){
             //derecha
-            System.out.println("JUGADOR: X: " + getX() + ", Y: " + getY());
             velocity.x = speed;
             animationTime = 0;
-        }else if(pointX <= (wScreen * wPer)){
+        }else if(izquierda){
             //izquierda
             velocity.x = -speed;
             animationTime = 0;
         }
-        //setPosition(getX() + velocity.x * delta,getY());
         setPosition(getX() + velocity.x,getY());
     }
 
