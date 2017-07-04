@@ -16,7 +16,7 @@ public class NPC extends Sprite implements InputProcessor {
     /** the movement velocity */
     private Vector2 velocity = new Vector2();
 
-    private float speed = 6 , gravity = 0, animationTime = 0, increment;
+    private float speed = 0.3f , gravity = 0, animationTime = 0, increment;
     private float wPer = 0.3f, hPer = 0.3f;
 
     private boolean canJump=false, movimiento=false;
@@ -90,13 +90,39 @@ public class NPC extends Sprite implements InputProcessor {
 
     private void settingMove() {
         if (crono.getNuSeg() % seg_wait != 0){
+            //Durante el movimiento
             movimiento = true;
         } else{
-            int signo = (int) (Math.random() * 2) + 1;
-            signo = (int) Math.pow((-1), signo);
-            if(global_i > 0){
-                //if
+            movimiento = false;
+            //despues de n segundos
+            int signoX = (int) (Math.random() * 2) + 1;
+            signoX = (int) Math.pow((-1), signoX);
+
+            if(signoX < 0){
+                izquierda = true;
+                derecha = false;
+            } else if(signoX > 0){
+                derecha = true;
+                izquierda = false;
+            } else {
+                derecha = false;
+                izquierda = false;
             }
+
+            int signoY = (int) (Math.random() * 2) + 1;
+            signoY = (int) Math.pow((-1), signoY);
+
+            if(signoY < 0){
+                abajo = true;
+                arriba = false;
+            } else if(signoY > 0){
+                arriba = true;
+                abajo = false;
+            } else {
+                abajo = false;
+                arriba = false;
+            }
+
         }
     }
 

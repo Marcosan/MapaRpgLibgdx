@@ -48,7 +48,7 @@ import kokoa.induccion.mapa.entities.Player;
 public class Play implements InputProcessor, Screen {
     private static final int CAM_SIZE_X = 700;
     private static final int CAM_SIZE_Y = 600;
-    private static final int NUM_NPC = 5;
+    private static final int NUM_NPC = 2;
 
     private TiledMap map;
     private OrthogonalTiledMapRenderer renderer;
@@ -56,6 +56,7 @@ public class Play implements InputProcessor, Screen {
 
     private TextureAtlas playerAtlas;
     private Player player;
+    private TextureAtlas npcAtlas;
 
     private int[] background = new int[] {0}, foreground = new int[] {1}, objLayer = new int[] {2};
 
@@ -112,10 +113,29 @@ public class Play implements InputProcessor, Screen {
         animation.put("left", left);
         animation.put("right", right);
 
+        //INICIO
+        npcAtlas = new TextureAtlas("img/player/player.pack");
+        Hashtable<String, Animation> animation2 = new Hashtable<String, Animation>();
+        Animation still2, left2, right2;
+        still2 = new Animation(1 / 2f, npcAtlas.findRegions("still"));
+        left2 = new Animation(1 / 6f, npcAtlas.findRegions("left"));
+        right2 = new Animation(1 / 6f, npcAtlas.findRegions("right"));
+
+        still2.setPlayMode(Animation.PlayMode.LOOP);
+        left2.setPlayMode(Animation.PlayMode.LOOP);
+        right2.setPlayMode(Animation.PlayMode.LOOP);
+
+        animation2.put("still", still2);
+        animation2.put("left", left2);
+        animation2.put("right", right2);
+        //FIN
+
         player = new Player(animation, (TiledMapTileLayer) map.getLayers().get(capa), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y);
 
-        for (int i = 0; i < npcList.size(); i++){
-            npcList.add(i, new NPC(animation, (TiledMapTileLayer) map.getLayers().get(capa), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y, new NpcWalk(5,5), crono, 3));
+        for (int i = 0; i < NUM_NPC; i++){
+            npcList.add(i, new NPC(animation, (TiledMapTileLayer) map.getLayers().get(capa), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y, new NpcWalk(5,5), crono, 2));
+            npcList.get(i).setPosition(posIniX,posIniY);
+            Gdx.input.setInputProcessor(npcList.get(i));
         }
         //player = new Player(still, left, right, (TiledMapTileLayer) map.getLayers().get("Paredes_cercas"), wMap, hMap, CAM_SIZE_X, CAM_SIZE_Y);
         //player.setPosition(11 * player.getCollisionLayer().getTileWidth(), (player.getCollisionLayer().getHeight() - 14) * player.getCollisionLayer().getTileHeight());
@@ -142,6 +162,9 @@ public class Play implements InputProcessor, Screen {
 
         renderer.getBatch().begin();
         player.draw(renderer.getBatch());
+        for (int i = 0; i < npcList.size(); i++){
+            npcList.get(i).draw(renderer.getBatch());
+        }
         renderer.getBatch().end();
 
         renderer.render(foreground);

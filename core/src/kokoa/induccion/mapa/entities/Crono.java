@@ -9,7 +9,7 @@ public class Crono extends Thread {
         try {//si ocurre un error al dormir el proceso(sleep(999))
             for (; ;){ //for infinito
                 nuSeg++;
-                System.out.println(nuSeg);
+                //System.out.println(nuSeg);
                 sleep(999);//Duermo el hilo durante 999 milisegundos(casi un segundo, quintandole el tiempo de proceso)
                 if (nuSeg > 60){
                     nuSeg = 0;
